@@ -1,0 +1,21 @@
+{
+  "name": "ButtonParser",
+  "author": "Trey Davis",
+  "version": "0.1.0",
+  "url": "https://www.mediawiki.org/wiki/Extension:Example",
+  "descriptionmsg": "ButtonParser adds a parser to generate buttons using MediaWiki's CSS library",
+  "license-name": "GPL-2.0+",
+  "type": "parserhook",
+  "AutoloadClasses": {
+    "ButtonParser": "ButtonParser.class.php"
+  },
+  "ExtensionMessagesFiles": {
+    "ButtonParser": "ButtonParser.i18n.php"
+  },
+  "Hooks": {
+    "ParserFirstCallInit": [
+      "ButtonParser::onParserSetup"
+    ]
+  },
+  "manifest_version": 1
+}
