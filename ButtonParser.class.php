@@ -8,7 +8,7 @@ class ButtonParser {
    }
 
    // Render the output of {{#example:}}.
-   public static function renderButtonLink( $parser, $param1, $param2) {
+   public static function renderButtonLink( $parser, $param1, $param2='') {
 
       // The input parameters are wikitext with templates expanded.
       // param1 = link, relative or direct
@@ -20,10 +20,10 @@ class ButtonParser {
         if(empty($param2)) {
           // If this evaluates to true, title string is empty so use the link
           // as button title and return some html
-          $output = "<div class=\"mw-ui-button mw-ui-progressive\"><a href=\"" . $param1 . "\">" . $param1 . "</a></div>";
+          $output = "<a class=\"mw-ui-button mw-ui-progressive\" href=\"" . $param1 . "\">" . $param1 . "</a>";
         } else {
           // We apparantly have a title present
-          $output = "<div class=\"mw-ui-button mw-ui-progressive\"><a href=\"" . $param1 . "\">" . $param2 . "</a></div>";
+          $output = "<a class=\"mw-ui-button mw-ui-progressive\" href=\"" . $param1 . "\">" . $param2 . "</a>";
         }
 
         // Return html
@@ -35,17 +35,31 @@ class ButtonParser {
           $internalLink = $parser->replaceInternalLinks("[[" . $param1 . "]]");
 
           // Build the rest of the button
-          $output = "<div class=\"mw-ui-button mw-ui-progressive\">" . $internalLink . "</div>";
+          $output = $internalLink;
         } else {
           // We have a title, so lets make a fancy wiki link
           $internalLink = $parser->replaceInternalLinks("[[" . $param1 . "|" . $param2 . "]]");
 
           // Build the rest of the button
-          $output = "<div class=\"mw-ui-button mw-ui-progressive\">" . $internalLink . "</div>";
+          $output = $internalLink;
         }
         // Prepare the output for html output
-        // Since we parsed a wiki link, mediawiki will add those pesky classes to our link... lets remove them
-        $output = str_replace(" class=\"external mw-version-ext-name\"", "", $output);
+        // Since we used MediaWiki's parser, a few different scenarios can occur for generated link...
+        // First check if we self-linked -- if so, mediawiki will not make a link, only a <strong> tag
+        if(strpos($output, "selflink"))
+        {
+            // MediaWiki found a self-link so format is <strong class="selflink">text</strong>
+            // We need to change the class to button classes
+            $output = str_replace("selflink", "mw-ui-button mw-ui-progressive", $output);
+        } elseif(strpos($output, "LINK")) {
+            // MediaWiki handles nonexistent links with an extra parser
+            // We need to wrap this preparsed output with a div with the button class
+            $output = "<div class=\"mw-ui-button mw-ui-progressive\">" . $output . "</div>";
+        } else {
+            // MediaWiki will not have appended a class to a normal internal link
+            // We need to str_replace the actual tag to inject our class
+            $output = str_replace("<a ", "<a class=\"mw-ui-button mw-ui-progressive\" ", $output);
+        }
 
         // Return html
         return array( $output, 'noparse' => true, 'isHTML' => true );
